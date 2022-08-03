@@ -1,0 +1,23 @@
+** Start Flow: HM_Char_Test, Project: HM_CHAR.atelier, Date: 2022/07/06 17:23:07 **
+TestID      TestDescription/Event           Result      Value         U.limit       L.limit       DUT  Pin/pattern                     Sequence
+201         IForce(-200uA)VMeas             Pass        -574.000mV    -300.000mV    -900.000mV      1  VCC1                            OS_TEST
+201         IForce(-200uA)VMeas             Pass        -556.781mV    -300.000mV    -900.000mV      1  VCC3                            OS_TEST
+201         IForce(-200uA)VMeas             Pass        -542.969mV    -300.000mV    -900.000mV      1  VCC                             OS_TEST
+201         IForce(-200uA)VMeas             Pass        -769.188mV    -300.000mV    -900.000mV      1  ATO                             OS_TEST
+100         VccPowerFactor                  Pass         0.93000       1.30000       0.90000        1  LogicalResource.SYNC_NamedControlBit  VCC_LEVEL_SET_3V3
+0           IO1V8_IIH_TEST                  Pass        -0.01000uA     10.0000uA    -10.0000uA      1  RESETB                          IO1V8_IIH_TEST
+0           IO1V8_IIH_TEST                  Pass         0.08000uA     10.0000uA    -10.0000uA      1  GPIO3                           IO1V8_IIH_TEST
+0           IO1V8_IIH_TEST                  Pass         0.08000uA     10.0000uA    -10.0000uA      1  GPIO3                           IO1V8_IIL_TEST
+316         VOH Current: 0.1mA              Fail         3.21500V      1.80000V      1.35000V       1  GPIO2                           IO3V3_VOH_TEST
+316         VOH Current: 0.1mA              Fail         3.21500V      1.80000V      1.35000V       1  GPIO2                           IO3V3_VOL_TEST
+400         Read OTP Addr: 0xff             Pass         255.000       255.000       0.00000        1  LogicalResource.DM64_IO         OTP_READ
+400         Read OTP Addr: 0xff             Pass         255.000       255.000       0.00000        1  LogicalResource.DM64_IO         OTP_WRIT
+403         TC_se_Ld: 0x0_0x0_-0u           Pass         4660701      16000000       2000000        1  LogicalResource.DM64_TMU        OSC_SCAN
+407         Vo_Tc_Sel_Ld:0x0_0x0_0x0_-0u    Pass         26.8253V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+** End Flow
+1
+** Start Flow
+TestID      TestDescription/Event           Result      Value         U.limit       L.limit       DUT  Pin/pattern                     Sequence
+201         IForce(-200uA)VMeas             Pass        -542.188mV    -300.000mV    -900.000mV      1  VCC3                            OS_TEST
+400         Read OTP Addr: 0xff             Pass         255.000       255.000       0.00000        1  LogicalResource.DM64_IO         OTP_READ
+** End Flow

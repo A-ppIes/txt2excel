@@ -1,0 +1,14 @@
+** Start Flow: HM_Char_Test, Project: HM_CHAR.atelier, Date: 2022/07/06 17:23:07 **
+TestID      TestDescription/Event           Result      Value         U.limit       L.limit       DUT  Pin/pattern                     Sequence
+201         IForce(-200uA)VMeas             Pass        -572.000mV    -300.000mV    -900.000mV      1  INTR                            OS_TEST
+0           IO1V8_IIH_TEST                  Pass        -0.01000uA     10.0000uA    -10.0000uA      1  RESETB                          IO1V8_IIH_TEST
+0           IO1V8_IIH_TEST                  Pass         0.08000uA     10.0000uA    -10.0000uA      1  GPIO3                           IO1V8_IIH_TEST
+0           Load Current -0.00mA            Pass         1.77586V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+0           Load Current -1.00mA            Pass         1.77320V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+** End Flow
+1
+** Start Flow
+TestID      TestDescription/Event           Result      Value         U.limit       L.limit       DUT  Pin/pattern                     Sequence
+201         IForce(-200uA)VMeas             Pass        -542.188mV    -300.000mV    -900.000mV      1  VCC3                            OS_TEST
+400         Read OTP_Addr: 0xff             Pass         255.000       255.000       0.00000        1  LogicalResource.DM64_IO         OTP_READ
+** End Flow
