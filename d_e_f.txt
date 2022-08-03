@@ -10,5 +10,5 @@ TestID      TestDescription/Event           Result      Value         U.limit   
 ** Start Flow
 TestID      TestDescription/Event           Result      Value         U.limit       L.limit       DUT  Pin/pattern                     Sequence
 201         IForce(-200uA)VMeas             Pass        -542.188mV    -300.000mV    -900.000mV      1  VCC3                            OS_TEST
-400         Read OTP_Addr: 0xff             Pass         255.000       255.000       0.00000        1  LogicalResource.DM64_IO         OTP_READ
+400         Read OTP Addr: 0xff             Pass         255.000       255.000       0.00000        1  LogicalResource.DM64_IO         OTP_READ
 ** End Flow
