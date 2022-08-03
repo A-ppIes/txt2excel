@@ -125,7 +125,7 @@ def txt2excel(txt_file, name_prefix):
             if excel_temp != excelname:  # 出现不同类型，则指向新类型
                 print('[Read] load excel:', excelname, k)
                 xls = openpyxl.load_workbook(excelname + '.xlsx')
-                sheet = xls.get_sheet_by_name(excelname)
+                sheet = xls[excelname]
         # 上面判断主要目的指向正确的xls
         
         
