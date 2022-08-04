@@ -12,8 +12,25 @@ TestID      TestDescription/Event           Result      Value         U.limit   
 316         VOH Current: 0.1mA              Fail         3.21500V      1.80000V      1.35000V       1  GPIO2                           IO3V3_VOL_TEST
 400         Read OTP Addr: 0xff             Pass         255.000       255.000       0.00000        1  LogicalResource.DM64_IO         OTP_READ
 400         Read OTP Addr: 0xff             Pass         255.000       255.000       0.00000        1  LogicalResource.DM64_IO         OTP_WRIT
-403         TC_se_Ld: 0x0_0x0_-0u           Pass         4660701      16000000       2000000        1  LogicalResource.DM64_TMU        OSC_SCAN
-407         Vo_Tc_Sel_Ld:0x0_0x0_0x0_-0u    Pass         26.8253V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+301         Dc:0.0mA                        Pass         1.81656V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+301         Dc:1.0mA                        Pass         1.81402V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+301         Dc:2.0mA                        Pass         1.81225V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+301         Dc:3.0mA                        Pass         1.81089V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+301         Dc:4.0mA                        Pass         1.80936V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+301         Dc:5.0mA                        Pass         1.80836V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+301         Dc:6.0mA                        Pass         1.80803V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+301         Dc:7.0mA                        Pass         1.80677V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+301         Dc:8.0mA                        Pass         1.80563V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+301         Dc:9.0mA                        Pass         1.80466V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
+407         Vo_Tc_Se_DC:0x0_0xe_0x14_0uA    Pass         31.1390V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_DC:0x0_0xe_0x14_10uA   Pass         30.5415V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_DC:0x0_0xe_0x14_20uA   Pass         29.5892V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_DC:0x0_0xe_0x14_30uA   Pass         28.5865V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_DC:0x0_0xe_0x15_0uA    Pass         31.1803V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_DC:0x0_0xe_0x15_10uA   Pass         30.7483V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_DC:0x0_0xe_0x15_20uA   Pass         29.8370V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_DC:0x0_0xe_0x15_30uA   Pass         28.8645V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_DC:0x0_0xe_0x15_40uA   Pass         27.8867V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
 ** End Flow
 1
 ** Start Flow

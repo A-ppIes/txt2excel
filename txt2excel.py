@@ -7,10 +7,43 @@ import re
 import openpyxl
 
 excel_dict = {}
+que_dict = {}
 # xls = {}
 # sheet = {}
 
 txt_temp = ''
+
+def function1(des, dc, name):
+    des = des.strip()
+    site = 0
+    add_row = False
+    add_cow = False
+    if (des != 'Dc' and des != 'DC'):
+        return False, add_cow, add_row, site
+    if (len(dc.split('.')) <= 1):
+        dc = int(dc)
+    else:
+        dc = float(dc)
+    global que_dict
+    if (len(que_dict[name]) == 0):
+        add_row = True
+        # que_dict[name].append(dc)
+        que_dict.setdefault(name, []).append(dc)
+        add_cow = True
+        site = len(que_dict[name])
+    elif (que_dict[name][-1] < dc):
+        que_dict.setdefault(name, []).append(dc)
+        add_cow = True
+        site = len(que_dict[name])
+    else:
+        for x in que_dict[name]:
+            site += 1
+            if (x == dc):
+                if (site == 1):
+                    add_row = True
+                break
+    return True, add_cow, add_row, site
+           
 
 def dec_hex(str):
     pattern = r'0[xX][0-9a-fA-F]+'  # 0x 十六进制
@@ -37,7 +70,7 @@ def txt2excel(txt_file, name_prefix):
     abc = name_prefix.split('_')  # 获取Excel的abc列内容
     print(abc)
     if len(abc) < 3:
-        print('[Error] name of txt error')
+        print("\033[0;31;40m[Error] name of txt error\033[0m")
         sys.exit()
     
     pos = []  # 保存txt表头每列的起始位置
@@ -51,7 +84,7 @@ def txt2excel(txt_file, name_prefix):
 
     pos_len = len(pos)
     if (pos_len != len(hijks)):
-        print('[Error] Head num error')
+        print("\033[0;31;40m[Error] Head num error\033[0m")
         sys.exit()
     
     pos_range = []  # 每一列的范围，按照Excel表的位置保存
@@ -67,6 +100,7 @@ def txt2excel(txt_file, name_prefix):
     excel_temp = ''  # 判断Sequence是否与上一条不同
     global txt_temp  # 判断是否是新的txt文件
     global excel_dict  # 字典，保存每个Excel表的行位置
+    global que_dict  # 字典，保存dc长度
 
     start = False
 
@@ -98,7 +132,7 @@ def txt2excel(txt_file, name_prefix):
         # print(excelname, k)
         if not excelname in excel_dict:  # 如果无此表，保存上一次的结果，并另新建一个
             if os.path.exists(excelname + '.xlsx'):
-                print('[Warn] please keep pwd no excel')
+                print("\033[0;33;40m[Warn] please keep pwd no excel\033[0m")
                 return
             if excel_temp != '':  # 判断是否为第一次有效行
                 xls.save(excel_temp + '.xlsx')
@@ -106,9 +140,11 @@ def txt2excel(txt_file, name_prefix):
                 xls = openpyxl.Workbook()
 
             print('[Write] new excel:', excelname, k)
-            r = 2                #在excel开始写的位置（y）
-            c = 1                #在excel开始写的位置（x）
+            r = 2  # 在excel开始写的位置（y）
+            c = 1  # 在excel开始写的位置（x）
             excel_dict[excelname] = r
+            que_dict[excelname] = []
+            que_row = 2  # 参数待优化
             sheet = xls.create_sheet(excelname, 0)
             for i in range(len(head)):  # 写表头数据
                 sheet.cell(row = 1, column = i + 1, value = head[i])
@@ -159,20 +195,34 @@ def txt2excel(txt_file, name_prefix):
                 descs = desc.split('_')
                 dates = date.split('_')
                 if (len(descs) != len(dates)):
-                    print('[Error] the num of events and values not same')
+                    print("\033[0;31;40m[Error] the num of events and values not same\033[0m")
                     sys.exit()
                 # pattern = r'(.*?);'
                 # result = re.findall(pattern, date) # result = {' 0x00', ' 0x01', ' -0uA'}
-                
+                jj = -1
+                site = 0
+                b_c = False
+                b_r = False
                 for j in range(len(dates)):
                     decimal, unit, type = dec_hex(dates[j])
+                    b_jude, b_c, b_r, site  = function1(descs[j], decimal, excelname)
+                    if b_jude:
+                        jj = j
                     if type:
                         test = descs[j] + '/' + unit
                     else:
                         test = descs[j]
                     sheet.cell(row = excel_dict[excelname], column = j + i + 1, value = decimal)
                     sheet.cell(row = 1, column = j + i + 1, value = test)
-
+                if jj != -1:
+                    col = jj + site + 10
+                    if b_r:
+                        que_row = excel_dict[excelname]
+                    if b_c:
+                        sheet.cell(row = 1, column = col, value = dates[jj])
+                    cell = sheet.cell(row = excel_dict[excelname], column = 8).value
+                    sheet.cell(row = que_row, column = col, value = cell)
+                        
         excel_dict[excelname] += 1
         excel_temp = excelname
     txt_temp = name_prefix
@@ -182,7 +232,7 @@ def merger_excel():
     prefix = {}  # 字典，文件名前缀出现次数
     key = []  # 列表，保存需要合并的文件的关键字
     filelist = []  # 保存需要合并的文件
-    listd = os.listdir('./')  #文件列表
+    listd = os.listdir('./')  # 文件列表
     
     for file in listd:
         if file.endswith('.xlsx'):
@@ -194,20 +244,20 @@ def merger_excel():
                 prefix[name] += 1
     for k in prefix.keys():
         if prefix[k] > 1:
-            key.append(k + '_')
+            key.append(k)
     print(key)
     
     for i in range(len(key)):
         filelist_temp = []
         for file in listd:
-            if key[i] in file:
+            if key[i] in file.split('_')[0]:
                 filelist_temp.append(file)
         filelist.append(filelist_temp)
     print(filelist)  # 需要合并的文件列表
 
     for i in range(len(filelist)):
         if len(filelist[i]) == 1:
-            print('[Warn] only one excel]')
+            print("\033[0;32;40[Warn] only one excel]\033[0m")
             continue
         src = openpyxl.load_workbook(filelist[i][0])
         print('[Read] open ' + filelist[i][0])
@@ -227,10 +277,10 @@ def merger_excel():
         src.save(filelist[i][0])
         test_name = ''
         #重命名处理
-        if key[i] == 'IO1V8_' or key[i] == 'IO3V3_':
-            test_name = 'DC_TEST'
+        if key[i] == 'IO1V8' or key[i] == 'IO3V3':
+            test_name = '_DC_TEST'
         else:
-            test_name = 'TEST'
+            test_name = '_TEST'
         os.rename(filelist[i][0], key[i] + test_name + '.xlsx')
         print('[Name] new excel name ' + key[i] + 'DC_TEST' + '.xlsx')
 
@@ -245,7 +295,7 @@ if __name__ == "__main__":
             txt_prefix.append(os.path.basename(sys.argv[i]).split('.txt')[0])
             print('[Read] txtFile %s : %s' % (i, sys.argv[i]))
         else:
-            print('[Error] txtFile %s : %s not found' % (i, sys.argv[i]))
+            print("\033[0;31;40m[Error] txtFile %s : %s not found\033[0m" % (i, sys.argv[i]))
             sys.exit()
     
     for i in range(1, txt_num):
