@@ -24,6 +24,10 @@ python3 txt2excel.py a_b_c_d.txt e_f_g_h.txt
 
 所有txt文件中相同的`Sequence`将保存在同一个`"sequence_name".xlsx`文件中
 
+#### 数据处理
+
+在生成excel文件后，对表格数据进行处理
+
 #### 表格合并
 
 合并操作是在所有表格生成结束后再进行的，合并完成后再删除多余文件

@@ -183,7 +183,7 @@ def fun1(xl):
     cc = 9
     unit = ''
     pre = ''
-    while True:
+    while True:  # 找到Dc的列，赋值给cc，如果没有则下一个文件
         cell_temp = source.cell(row=1, column=cc)
         if cell_temp.value:
             temp = cell_temp.value.split('/')[0]
@@ -202,20 +202,19 @@ def fun1(xl):
     print(cc)
     target = xls.create_sheet('test', 1)
     t_cc_s = cc + 1
-    t_cc = t_cc_s
-    t_rr = 2
-    index_c = cc - 1
-    head_num = []
-    head_str = []
-    type1 = 0
-    val_pre = 0
-    once = True
+    t_cc = t_cc_s  # t_cc代表目标sheet的列位置
+    t_rr = 2  # 同上
+    index_c = cc - 1  # list遍历时用到的指针
+    head_num = []  # Dc对应的值 0 10 20 30 0 10 20
+    head_str = []  # T对应的字符串
+    type1 = 0  # T or Dc
+    val_pre = 0  # 用来判断换行
     temp1 = 0
     m_r = source.max_row
     print(m_r)
-    list_line = list(source.values)
+    list_line = list(source.values)  # 读取sheet的全部值
     cell_str = source.cell(row=2, column=cc).value
-    if not cell_str:
+    if not cell_str:  # 存在没有值的情况
         temp1 += 1
     
     cell_str = source.cell(row=temp1+2, column=cc).value
@@ -224,13 +223,13 @@ def fun1(xl):
     has_num = re.findall(pattern, cell_str)
     if has_num:
         if len(cell_str.split('.')) > 1:
-            type1 = 1
+            type1 = 1  # 小数
         else:
-            type1 = 2
+            type1 = 2  # 整数
     else:
-        type1 = 3
+        type1 = 3  # 字符串
     for index_r in range(temp1 + 1, m_r):
-        line = list_line[index_r]
+        line = list_line[index_r]  # 遍历原sheet的行
         if type1 == 1:
             val = float(line[index_c])
         elif type1 == 2:
@@ -241,7 +240,7 @@ def fun1(xl):
             print("\033[0;31m[Error] in 227 line\033[0m")
         # print(type(line_r))
         # target.append(list_line[i])
-        if type1 == 3:
+        if type1 == 3:  # T处理仅仅横排显示
             if len(head_str) == 0:
                 head_str.append(strr)
                 t_cc += 1
@@ -257,20 +256,20 @@ def fun1(xl):
             target.append(line)
             target.cell(row=t_rr, column=t_cc, value=line[7])
         else:
-            if len(head_num) == 0:
+            if len(head_num) == 0:  # 第一行
                 head_num.append(val)
                 t_cc += 1
-                target.append(list_line[0])
-                target.append(line)
-                target.cell(row=1, column=t_cc, value=pre + str(val) + unit)
+                target.append(list_line[0])  # 头目录
+                target.append(line)  # 第一行内容
+                target.cell(row=1, column=t_cc, value=pre + str(val) + unit)  # 通过t_cc确定横排的位置
                 # target.cell(row=2, column=t_cc, value=source.cell(row=rr, column=8).value)
-            elif head_num[-1] < val:
+            elif head_num[-1] < val:  # 如果Dc的值出现更大的情况
                 head_num.append(val)
                 t_cc += 1
                 target.cell(row=1, column=t_cc, value=pre + str(val) + unit)
             else:
                 t_cc = t_cc_s
-                if val < val_pre:
+                if val < val_pre:  # 只在数据下降沿换行
                     t_rr += 1
                     target.append(line)
                 for i in range(len(head_num)):
@@ -278,7 +277,7 @@ def fun1(xl):
                         t_cc += i + 1
             # print('[%d, %d]' % (t_rr, t_cc))
             val_pre = val
-            target.cell(row=t_rr, column=t_cc, value=line[7])
+            target.cell(row=t_rr, column=t_cc, value=line[7])  # 填充value值
     xls.remove(source)
     target.title = xl.split('.')[0]
     xls.save(xl)
@@ -364,10 +363,10 @@ if __name__ == "__main__":
     
     listd = os.listdir('./')  # 文件列表
     for file in listd:
-        if file.endswith('.xlsx'):
+        if file.endswith('.xlsx'):  # excel文件
             xl_file.append(file)
     
-    for key in fun_key:
+    for key in fun_key:  # 对特定文件判断
         for file in xl_file:
             if key in file.split('_')[0]:
                 fun_list.append(file)
