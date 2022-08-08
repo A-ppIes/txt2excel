@@ -22,19 +22,69 @@ TestID      TestDescription/Event           Result      Value         U.limit   
 301         Dc:7.0mA                        Pass         1.80677V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
 301         Dc:8.0mA                        Pass         1.80563V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
 301         Dc:9.0mA                        Pass         1.80466V      2.00000V      1.50000V       1  VCCIO                           VCCIO_LOAD
-407         Vo_Tc_Se_DC:0x0_0xe_0x14_0uA    Pass         31.1390V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
-407         Vo_Tc_Se_DC:0x0_0xe_0x14_10uA   Pass         30.5415V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
-407         Vo_Tc_Se_DC:0x0_0xe_0x14_20uA   Pass         29.5892V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
-407         Vo_Tc_Se_DC:0x0_0xe_0x14_30uA   Pass         28.5865V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
-407         Vo_Tc_Se_DC:0x0_0xe_0x15_0uA    Pass         31.1803V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
-407         Vo_Tc_Se_DC:0x0_0xe_0x15_10uA   Pass         30.7483V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
-407         Vo_Tc_Se_DC:0x0_0xe_0x15_20uA   Pass         29.8370V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
-407         Vo_Tc_Se_DC:0x0_0xe_0x15_30uA   Pass         28.8645V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
-407         Vo_Tc_Se_DC:0x0_0xe_0x15_40uA   Pass         27.8867V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_Dc:0x0_0xe_0x14_0uA    Pass         31.1390V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_Dc:0x0_0xe_0x14_10uA   Pass         30.5415V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_Dc:0x0_0xe_0x14_20uA   Pass         29.5892V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_Dc:0x0_0xe_0x14_30uA   Pass         28.5865V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_Dc:0x0_0xe_0x15_0uA    Pass         31.1803V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_Dc:0x0_0xe_0x15_10uA   Pass         30.7483V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_Dc:0x0_0xe_0x15_20uA   Pass         29.8370V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_Dc:0x0_0xe_0x15_30uA   Pass         28.8645V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+407         Vo_Tc_Se_Dc:0x0_0xe_0x15_40uA   Pass         27.8867V      32.0000V      10.0000V       1  CGPO                            HVPP_LOAD_SCAN
+418         TrimConfig                      Pass        ------------  ------------  ------------    1  CP_Trim_Code_SPI.csv            VBD_TEST
+418         VoTc_Sel_T:0x62_0x13_Spad       Pass         523.000      65535000       2.00000        1  LogicalResource.DM64_IO         VBD_TEST
+418         VoTc_Sel_T:0x62_0x13_HV         Pass         28.5667       32.0000       10.0000        1  LogicalResource.DM64_IO         VBD_TEST
+419         TrimConfig                      Pass        ------------  ------------  ------------    1  CP_Trim_Code_SPI.csv            DCR_TEST
+419         VoTc_Sel_T: 0x62_0x1f_Main      Pass         3736258      65535000       2.00000        1  LogicalResource.DM64_IO         DCR_TEST
+419         VoTc_Sel_T: 0x62_0x1f_Ref       Pass          117898      65535000       2.00000        1  LogicalResource.DM64_IO         DCR_TEST
 ** End Flow
 1
 ** Start Flow
 TestID      TestDescription/Event           Result      Value         U.limit       L.limit       DUT  Pin/pattern                     Sequence
 201         IForce(-200uA)VMeas             Pass        -542.188mV    -300.000mV    -900.000mV      1  VCC3                            OS_TEST
 400         Read OTP Addr: 0xff             Pass         255.000       255.000       0.00000        1  LogicalResource.DM64_IO         OTP_READ
+409         BLo_BHi_Dc: 0x2_0x4_0.0mA       Pass         3.43063V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_0.1mA       Pass         3.47225V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_0.2mA       Pass         3.45838V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_0.3mA       Pass         3.46519V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_0.4mA       Pass         3.46600V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_0.5mA       Pass         3.46563V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_0.6mA       Pass         3.46606V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_0.7mA       Pass         3.46800V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_0.8mA       Pass         3.46581V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_0.9mA       Pass         3.45181V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.0mA       Pass         3.45450V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.1mA       Pass         3.45744V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.2mA       Pass         3.46094V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.3mA       Pass         3.46525V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.4mA       Pass         3.46762V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.5mA       Pass         3.46756V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.6mA       Pass         3.47119V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.7mA       Pass         3.47156V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.8mA       Pass         3.47475V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_1.9mA       Pass         3.47938V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.0mA       Pass         3.48219V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.1mA       Pass         3.48481V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.2mA       Pass         3.48831V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.3mA       Pass         3.48981V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.4mA       Pass         3.49581V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.5mA       Pass         3.49412V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.6mA       Pass         3.49513V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.7mA       Pass         3.50113V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.8mA       Pass         3.50006V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_2.9mA       Pass         3.49781V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_3.0mA       Pass         3.37250V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_3.1mA       Fail         2.98569V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_3.2mA       Fail         2.52475V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_3.3mA       Fail         2.06256V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_3.4mA       Fail         1.62031V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x4_3.5mA       Fail         1.22925V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x5_0.0mA       Pass         3.56688V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x5_0.1mA       Pass         3.51038V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x5_0.2mA       Pass         3.51894V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x5_0.3mA       Pass         3.49744V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x5_0.4mA       Pass         3.50663V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x5_0.5mA       Pass         3.50588V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x5_0.6mA       Pass         3.50713V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
+409         BLo_BHi_Dc: 0x2_0x5_0.7mA       Pass         3.51038V      7.00000V      3.00000V       1  VLD                             VLD_DRIVER_SCAN
 ** End Flow

@@ -13,38 +13,6 @@ que_dict = {}
 
 txt_temp = ''
 
-def function1(des, dc, name):
-    des = des.strip()
-    site = 0
-    add_row = False
-    add_cow = False
-    if (des != 'Dc' and des != 'DC'):
-        return False, add_cow, add_row, site
-    if (len(dc.split('.')) <= 1):
-        dc = int(dc)
-    else:
-        dc = float(dc)
-    global que_dict
-    if (len(que_dict[name]) == 0):
-        add_row = True
-        # que_dict[name].append(dc)
-        que_dict.setdefault(name, []).append(dc)
-        add_cow = True
-        site = len(que_dict[name])
-    elif (que_dict[name][-1] < dc):
-        que_dict.setdefault(name, []).append(dc)
-        add_cow = True
-        site = len(que_dict[name])
-    else:
-        for x in que_dict[name]:
-            site += 1
-            if (x == dc):
-                if (site == 1):
-                    add_row = True
-                break
-    return True, add_cow, add_row, site
-           
-
 def dec_hex(str):
     pattern = r'0[xX][0-9a-fA-F]+'  # 0x 十六进制
     has_hex = re.findall(pattern, str)
@@ -70,7 +38,7 @@ def txt2excel(txt_file, name_prefix):
     abc = name_prefix.split('_')  # 获取Excel的abc列内容
     print(abc)
     if len(abc) < 3:
-        print("\033[0;31;40m[Error] name of txt error\033[0m")
+        print("\033[0;31m[Error] name of txt error\033[0m")
         sys.exit()
     
     pos = []  # 保存txt表头每列的起始位置
@@ -84,7 +52,7 @@ def txt2excel(txt_file, name_prefix):
 
     pos_len = len(pos)
     if (pos_len != len(hijks)):
-        print("\033[0;31;40m[Error] Head num error\033[0m")
+        print("\033[0;31m[Error] Head num error\033[0m")
         sys.exit()
     
     pos_range = []  # 每一列的范围，按照Excel表的位置保存
@@ -100,7 +68,6 @@ def txt2excel(txt_file, name_prefix):
     excel_temp = ''  # 判断Sequence是否与上一条不同
     global txt_temp  # 判断是否是新的txt文件
     global excel_dict  # 字典，保存每个Excel表的行位置
-    global que_dict  # 字典，保存dc长度
 
     start = False
 
@@ -132,7 +99,7 @@ def txt2excel(txt_file, name_prefix):
         # print(excelname, k)
         if not excelname in excel_dict:  # 如果无此表，保存上一次的结果，并另新建一个
             if os.path.exists(excelname + '.xlsx'):
-                print("\033[0;33;40m[Warn] please keep pwd no excel\033[0m")
+                print("\033[0;33m[Warn] please keep pwd no excel\033[0m")
                 return
             if excel_temp != '':  # 判断是否为第一次有效行
                 xls.save(excel_temp + '.xlsx')
@@ -143,8 +110,6 @@ def txt2excel(txt_file, name_prefix):
             r = 2  # 在excel开始写的位置（y）
             c = 1  # 在excel开始写的位置（x）
             excel_dict[excelname] = r
-            que_dict[excelname] = []
-            que_row = 2  # 参数待优化
             sheet = xls.create_sheet(excelname, 0)
             for i in range(len(head)):  # 写表头数据
                 sheet.cell(row = 1, column = i + 1, value = head[i])
@@ -195,53 +160,142 @@ def txt2excel(txt_file, name_prefix):
                 descs = desc.split('_')
                 dates = date.split('_')
                 if (len(descs) != len(dates)):
-                    print("\033[0;31;40m[Error] the num of events and values not same\033[0m")
+                    print("\033[0;31m[Error] the num of events and values not same\033[0m")
                     sys.exit()
                 # pattern = r'(.*?);'
                 # result = re.findall(pattern, date) # result = {' 0x00', ' 0x01', ' -0uA'}
-                jj = -1
-                site = 0
-                b_c = False
-                b_r = False
                 for j in range(len(dates)):
                     decimal, unit, type = dec_hex(dates[j])
-                    b_jude, b_c, b_r, site  = function1(descs[j], decimal, excelname)
-                    if b_jude:
-                        jj = j
                     if type:
                         test = descs[j] + '/' + unit
                     else:
                         test = descs[j]
                     sheet.cell(row = excel_dict[excelname], column = j + i + 1, value = decimal)
                     sheet.cell(row = 1, column = j + i + 1, value = test)
-                if jj != -1:
-                    col = jj + site + 10
-                    if b_r:
-                        que_row = excel_dict[excelname]
-                    if b_c:
-                        sheet.cell(row = 1, column = col, value = dates[jj])
-                    cell = sheet.cell(row = excel_dict[excelname], column = 8).value
-                    sheet.cell(row = que_row, column = col, value = cell)
                         
         excel_dict[excelname] += 1
         excel_temp = excelname
     txt_temp = name_prefix
 
-def merger_excel():
+def fun1(xl):
+    xls = openpyxl.load_workbook(xl)
+    source = xls[xl.split('.')[0]]  # sheet
+    cc = 9
+    unit = ''
+    pre = ''
+    while True:
+        cell_temp = source.cell(row=1, column=cc)
+        if cell_temp.value:
+            temp = cell_temp.value.split('/')[0]
+            if temp == 'Dc' or temp == 'DC':
+                pre = 'Dc-'
+                unit = cell_temp.value.split('/')[1]
+                break
+            elif temp == 'T':
+                pre = 'T-'
+                break
+            else:
+                cc += 1
+        else:
+            return
+    print('\033[0;32mStart function in xlsx: %s\033[0m' % xl)
+    print(cc)
+    target = xls.create_sheet('test', 1)
+    t_cc_s = cc + 1
+    t_cc = t_cc_s
+    t_rr = 2
+    index_c = cc - 1
+    head_num = []
+    head_str = []
+    type1 = 0
+    val_pre = 0
+    once = True
+    temp1 = 0
+    m_r = source.max_row
+    print(m_r)
+    list_line = list(source.values)
+    cell_str = source.cell(row=2, column=cc).value
+    if not cell_str:
+        temp1 += 1
+    
+    cell_str = source.cell(row=temp1+2, column=cc).value
+    cell_str = str(cell_str)
+    pattern = r'[0-9]+'  # 数字
+    has_num = re.findall(pattern, cell_str)
+    if has_num:
+        if len(cell_str.split('.')) > 1:
+            type1 = 1
+        else:
+            type1 = 2
+    else:
+        type1 = 3
+    for index_r in range(temp1 + 1, m_r):
+        line = list_line[index_r]
+        if type1 == 1:
+            val = float(line[index_c])
+        elif type1 == 2:
+            val = int(line[index_c])
+        elif type1 == 3:
+            strr = line[index_c]
+        else:
+            print("\033[0;31m[Error] in 227 line\033[0m")
+        # print(type(line_r))
+        # target.append(list_line[i])
+        if type1 == 3:
+            if len(head_str) == 0:
+                head_str.append(strr)
+                t_cc += 1
+                target.append(list_line[0])
+                
+                target.cell(row=1, column=t_cc, value=pre + str(strr))
+            elif head_str[-1] != strr:
+                t_cc += 1
+                target.cell(row=1, column=t_cc, value=pre + str(strr))
+            else:
+                print('\033[0;33m[Warn]I dont konw\033[0m')
+            
+            target.append(line)
+            target.cell(row=t_rr, column=t_cc, value=line[7])
+        else:
+            if len(head_num) == 0:
+                head_num.append(val)
+                t_cc += 1
+                target.append(list_line[0])
+                target.append(line)
+                target.cell(row=1, column=t_cc, value=pre + str(val) + unit)
+                # target.cell(row=2, column=t_cc, value=source.cell(row=rr, column=8).value)
+            elif head_num[-1] < val:
+                head_num.append(val)
+                t_cc += 1
+                target.cell(row=1, column=t_cc, value=pre + str(val) + unit)
+            else:
+                t_cc = t_cc_s
+                if val < val_pre:
+                    t_rr += 1
+                    target.append(line)
+                for i in range(len(head_num)):
+                    if head_num[i] == val:
+                        t_cc += i + 1
+            # print('[%d, %d]' % (t_rr, t_cc))
+            val_pre = val
+            target.cell(row=t_rr, column=t_cc, value=line[7])
+    xls.remove(source)
+    target.title = xl.split('.')[0]
+    xls.save(xl)
+
+def merger_excel(xl_file):
     # IO1V8_XX IO3V3_XX前缀相同的合并到一个excel的不同sheet中
     prefix = {}  # 字典，文件名前缀出现次数
     key = []  # 列表，保存需要合并的文件的关键字
     filelist = []  # 保存需要合并的文件
-    listd = os.listdir('./')  # 文件列表
-    
-    for file in listd:
-        if file.endswith('.xlsx'):
-            name = file.split('.xlsx')[0]
-            name = name.split('_')[0]
-            if not name in prefix:
-                prefix[name] = 1
-            else:
-                prefix[name] += 1
+
+    for file in xl_file:
+        name = file.split('.xlsx')[0]
+        name = name.split('_')[0]
+        if not name in prefix:
+            prefix[name] = 1
+        else:
+            prefix[name] += 1
     for k in prefix.keys():
         if prefix[k] > 1:
             key.append(k)
@@ -249,7 +303,7 @@ def merger_excel():
     
     for i in range(len(key)):
         filelist_temp = []
-        for file in listd:
+        for file in xl_file:
             if key[i] in file.split('_')[0]:
                 filelist_temp.append(file)
         filelist.append(filelist_temp)
@@ -257,7 +311,7 @@ def merger_excel():
 
     for i in range(len(filelist)):
         if len(filelist[i]) == 1:
-            print("\033[0;32;40[Warn] only one excel]\033[0m")
+            print("\033[0;33m[Warn] only one excel]\033[0m")
             continue
         src = openpyxl.load_workbook(filelist[i][0])
         print('[Read] open ' + filelist[i][0])
@@ -289,19 +343,38 @@ if __name__ == "__main__":
     
     txt_num = len(sys.argv)
     txt_prefix = []  # 保存txt文件前缀名
+    xl_file = []
     merger = True
+    fun = True
+    fun_key = ["VCCIO", "HVPP", "VLD", "VBD", "DCR"]
+    fun_list = []
     for i in range(1, txt_num):
         if os.path.exists(sys.argv[i]):  # 如果文件名存在
             txt_prefix.append(os.path.basename(sys.argv[i]).split('.txt')[0])
             print('[Read] txtFile %s : %s' % (i, sys.argv[i]))
         else:
-            print("\033[0;31;40m[Error] txtFile %s : %s not found\033[0m" % (i, sys.argv[i]))
+            print("\033[0;31m[Error] txtFile %s : %s not found\033[0m" % (i, sys.argv[i]))
             sys.exit()
     
     for i in range(1, txt_num):
         txtfile = open(sys.argv[i], 'r')
+        print('\033[0;32mStart transform txt: %s\033[0m' % sys.argv[i])
         txt2excel(txtfile, txt_prefix[i - 1])
         txtfile.close()
     
+    listd = os.listdir('./')  # 文件列表
+    for file in listd:
+        if file.endswith('.xlsx'):
+            xl_file.append(file)
+    
+    for key in fun_key:
+        for file in xl_file:
+            if key in file.split('_')[0]:
+                fun_list.append(file)
+    if fun:
+        for xl in fun_list:
+            fun1(xl)
+    
     if merger:  # 合并文件
-        merger_excel()
+        print('\033[0;32mStart merger excel...\033[0m')
+        merger_excel(xl_file)
