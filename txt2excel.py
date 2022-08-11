@@ -209,26 +209,27 @@ def fun1(xl):
     head_str = []  # T对应的字符串
     type1 = 0  # T or Dc
     val_pre = 0  # 用来判断换行
-    temp1 = 0
+    once = True
     m_r = source.max_row
     print(m_r)
     list_line = list(source.values)  # 读取sheet的全部值
-    cell_str = source.cell(row=2, column=cc).value
-    if not cell_str:  # 存在没有值的情况
-        temp1 += 1
     
-    cell_str = source.cell(row=temp1+2, column=cc).value
-    cell_str = str(cell_str)
-    pattern = r'[0-9]+'  # 数字
-    has_num = re.findall(pattern, cell_str)
-    if has_num:
-        if len(cell_str.split('.')) > 1:
-            type1 = 1  # 小数
-        else:
-            type1 = 2  # 整数
-    else:
-        type1 = 3  # 字符串
-    for index_r in range(temp1 + 1, m_r):
+    for index_r in range(1, m_r):
+        cell_str = source.cell(row=index_r+1, column=cc).value
+        if not cell_str:  # 存在没有值的情况
+            continue
+        if once:
+            once = False
+            cell_str = str(cell_str)
+            pattern = r'[0-9]+'  # 数字
+            has_num = re.findall(pattern, cell_str)
+            if has_num:
+                if len(cell_str.split('.')) > 1:
+                    type1 = 1  # 小数
+                else:
+                    type1 = 2  # 整数
+            else:
+                type1 = 3  # 字符串
         line = list_line[index_r]  # 遍历原sheet的行
         if type1 == 1:
             val = float(line[index_c])
@@ -248,10 +249,12 @@ def fun1(xl):
                 
                 target.cell(row=1, column=t_cc, value=pre + str(strr))
             elif head_str[-1] != strr:
+                head_str.append(strr)
                 t_cc += 1
                 target.cell(row=1, column=t_cc, value=pre + str(strr))
             else:
-                print('\033[0;33m[Warn]I dont konw\033[0m')
+                t_cc += 1
+                print('\033[0;33m[Warn]T do nothing\033[0m')
             
             target.append(line)
             target.cell(row=t_rr, column=t_cc, value=line[7])
@@ -345,7 +348,7 @@ if __name__ == "__main__":
     xl_file = []
     merger = True
     fun = True
-    fun_key = ["VCCIO", "HVPP", "VLD", "VBD", "DCR"]
+    fun_key = ["VCCIO", "HVPP", "VLD", "VBD", "DCR", "PDE"]
     fun_list = []
     for i in range(1, txt_num):
         if os.path.exists(sys.argv[i]):  # 如果文件名存在
