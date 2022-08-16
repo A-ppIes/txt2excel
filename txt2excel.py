@@ -37,13 +37,13 @@ def dec_hex(str):
 def txt2excel(txt_file, name_prefix):
     abc = name_prefix.split('_')  # 获取Excel的abc列内容
     print(abc)
-    if len(abc) < 3:
+    if len(abc) < 4:
         print("\033[0;31m[Error] name of txt error\033[0m")
         sys.exit()
     
     pos = []  # 保存txt表头每列的起始位置
     hijks = ["TestDescription/Event", "Result", "Value", "U.limit", "L.limit", "DUT", "Pin/pattern", "Sequence"]
-    head = ["UUID(LOT_ID+WaferID)", "PROBE_XY", "Temperature(C)", "Power Voltage(V)", "Pin/Pattern", "LimitUpper", "LimitLower", "Result", "Test Condition1"]
+    head = ["LOT_ID", "WaferID", "PROBE_XY", "Temperature(C)", "Power Voltage(V)", "Pin/Pattern", "LimitUpper", "LimitLower", "Value", "Result", "Test Condition1"]
 
     txtlines = txt_file.readlines()  # 读取txt行数据
     for s in hijks:
@@ -60,6 +60,7 @@ def txt2excel(txt_file, name_prefix):
     pos_range.append([pos[3], pos[4]])
     pos_range.append([pos[4], pos[5]])
     pos_range.append([pos[2], pos[3]])
+    pos_range.append([pos[1], pos[2]])
     pos_range.append([pos[0], pos[1]])
     print(pos_range)
 
@@ -88,10 +89,10 @@ def txt2excel(txt_file, name_prefix):
             continue
         # 判断此行是否为电压数值
         power = txtline[pos_range[-1][0] : pos_range[-1][1]]  
-        if 'VccPowerFactor' in power:
+        if 'VccPower' in power:
             vcc = txtline[pos_range[3][0] : pos_range[3][1]]
             vcc = vcc.strip()
-            voltage = float(vcc) * 3.0
+            voltage = float(vcc)
             continue
         
         excelname = txtline[pos[-1]:-1]  # 获取Sequence作为excel命名
@@ -132,27 +133,33 @@ def txt2excel(txt_file, name_prefix):
         
         # sheet[excelname] = xls[excelname].get_sheet_by_name(excelname)
         # 对每一列写数据
+        pin = txtline[pos_range[0][0] : pos_range[0][1]]
+        r_f = txtline[pos_range[-2][0] : pos_range[-2][1]]
+        nrow = excel_dict[excelname]
         for i in range(len(head)):
-            if i < 3:
-                sheet.cell(row = excel_dict[excelname], column = i + 1, value = abc[i])
-            elif i == 3:
-                sheet.cell(row = excel_dict[excelname], column = i + 1, value = voltage)
-            elif i == 4:  # 不用考虑单位
-                sheet.cell(row = excel_dict[excelname], column = i + 1, value = txtline[pos_range[i-4][0] : pos_range[i-4][1]])
-            elif 4 < i < 8:  # 考虑单位
-                txt_cell = txtline[pos_range[i-4][0] : pos_range[i-4][1]]
+            if i < 4:
+                sheet.cell(row = nrow, column = i + 1, value = abc[i])
+            elif i == 4:
+                sheet.cell(row = nrow, column = i + 1, value = voltage)
+            elif i == 5:  # 不用考虑单位
+                sheet.cell(row = nrow, column = i + 1, value = pin)
+            elif 5 < i < 9:  # 考虑单位
+                txt_cell = txtline[pos_range[i-5][0] : pos_range[i-5][1]]
                 pattern = r'[A-Za-z]+|[-]?\d+[.]?\d*'
                 result = re.findall(pattern, txt_cell)
                 if len(result) > 1:
                     sheet.cell(row = 1, column = i + 1, value = head[i] + '/' + result[1])
-                    sheet.cell(row = excel_dict[excelname], column = i + 1, value = result[0])
+                    sheet.cell(row = nrow, column = i + 1, value = result[0])
                 elif len(result) > 0:
-                    sheet.cell(row = excel_dict[excelname], column = i + 1, value = result[0])
+                    sheet.cell(row = nrow, column = i + 1, value = result[0])
                 else:
-                    sheet.cell(row = excel_dict[excelname], column = i + 1, value = txt_cell)
-            elif i == 8: # 多条件处理
+                    sheet.cell(row = nrow, column = i + 1, value = txt_cell)
+            elif i == 9:
+                sheet.cell(row = nrow, column = i + 1, value = r_f)
+            elif i == 10: # 多条件处理
                 event = txtline[pos_range[-1][0] : pos_range[-1][1]]
                 if len(event.split(':')) <= 1:
+                    sheet.cell(row = nrow, column = i + 1, value = event.strip())
                     continue
                 desc = event.split(':')[0]
                 date = event.split(':')[1]  # date = ' 0x00_0x01_-0uA'
@@ -170,7 +177,7 @@ def txt2excel(txt_file, name_prefix):
                         test = descs[j] + '/' + unit
                     else:
                         test = descs[j]
-                    sheet.cell(row = excel_dict[excelname], column = j + i + 1, value = decimal)
+                    sheet.cell(row = nrow, column = j + i + 1, value = decimal)
                     sheet.cell(row = 1, column = j + i + 1, value = test)
                         
         excel_dict[excelname] += 1
@@ -215,7 +222,7 @@ def fun1(xl):
     list_line = list(source.values)  # 读取sheet的全部值
     
     for index_r in range(1, m_r):
-        cell_str = source.cell(row=index_r+1, column=cc).value
+        cell_str = source.cell(row=index_r+2, column=cc).value
         if not cell_str:  # 存在没有值的情况
             continue
         if once:
@@ -230,7 +237,13 @@ def fun1(xl):
                     type1 = 2  # 整数
             else:
                 type1 = 3  # 字符串
+            target.append(list_line[0])  # 头目录
         line = list_line[index_r]  # 遍历原sheet的行
+        cell_str = source.cell(row=index_r+1, column=9).value
+        if '----' in cell_str:
+            target.append(line)
+            t_rr += 1
+            continue
         if type1 == 1:
             val = float(line[index_c])
         elif type1 == 2:
@@ -242,13 +255,13 @@ def fun1(xl):
         # print(type(line_r))
         # target.append(list_line[i])
         if type1 == 3:  # T处理仅仅横排显示
-            if len(head_str) == 0:
-                head_str.append(strr)
-                t_cc += 1
-                target.append(list_line[0])
+            # if len(head_str) == 0:
+            #     head_str.append(strr)
+            #     t_cc += 1
+            #     # target.append(list_line[0])
                 
-                target.cell(row=1, column=t_cc, value=pre + str(strr))
-            elif head_str[-1] != strr:
+            #     target.cell(row=1, column=t_cc, value=pre + str(strr))
+            if len(head_str) == 0 or head_str[-1] != strr:
                 head_str.append(strr)
                 t_cc += 1
                 target.cell(row=1, column=t_cc, value=pre + str(strr))
@@ -257,12 +270,12 @@ def fun1(xl):
                 print('\033[0;33m[Warn]T do nothing\033[0m')
             
             target.append(line)
-            target.cell(row=t_rr, column=t_cc, value=line[7])
+            target.cell(row=t_rr, column=t_cc, value=line[8])
         else:
             if len(head_num) == 0:  # 第一行
                 head_num.append(val)
                 t_cc += 1
-                target.append(list_line[0])  # 头目录
+                
                 target.append(line)  # 第一行内容
                 target.cell(row=1, column=t_cc, value=pre + str(val) + unit)  # 通过t_cc确定横排的位置
                 # target.cell(row=2, column=t_cc, value=source.cell(row=rr, column=8).value)
@@ -280,7 +293,7 @@ def fun1(xl):
                         t_cc += i + 1
             # print('[%d, %d]' % (t_rr, t_cc))
             val_pre = val
-            target.cell(row=t_rr, column=t_cc, value=line[7])  # 填充value值
+            target.cell(row=t_rr, column=t_cc, value=line[8])  # 填充value值
     xls.remove(source)
     target.title = xl.split('.')[0]
     xls.save(xl)
@@ -306,7 +319,7 @@ def merger_excel(xl_file):
     for i in range(len(key)):
         filelist_temp = []
         for file in xl_file:
-            if key[i] in file.split('_')[0]:
+            if key[i] == file.split('_')[0]:
                 filelist_temp.append(file)
         filelist.append(filelist_temp)
     print(filelist)  # 需要合并的文件列表
@@ -348,7 +361,7 @@ if __name__ == "__main__":
     xl_file = []
     merger = True
     fun = True
-    fun_key = ["VCCIO", "HVPP", "VLD", "VBD", "DCR", "PDE"]
+    fun_key = ["VCCIO", "HVPP", "VLD"]
     fun_list = []
     for i in range(1, txt_num):
         if os.path.exists(sys.argv[i]):  # 如果文件名存在
