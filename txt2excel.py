@@ -16,7 +16,7 @@ txt_temp = ''
 def dec_hex(str):
     pattern = r'0[xX][0-9a-fA-F]+'  # 0x 十六进制
     has_hex = re.findall(pattern, str)
-    type = 0  # 判断有无单位
+    unit_flag = 0  # 判断有无单位
     unit = ''
     res = 0
     if has_hex:
@@ -25,16 +25,16 @@ def dec_hex(str):
         pattern1 = r'[A-Za-z]+|[-]?\d+[.]?\d*'
         has_unit = re.findall(pattern1, str)
         if len(has_unit) > 1:  # 有单位
-            type = 1
+            unit_flag = 1
             unit = has_unit[1]
             res = has_unit[0]
         elif len(has_unit) > 0:  # 无单位
             res = has_unit[0]
         else:
             res = str
-    return res, unit, type  # 数值结果，单位，有无单位
+    return res, unit, unit_flag  # 数值结果，单位，有无单位
 
-def txt2excel(txt_file, name_prefix):
+def txt2excel(txt_file, name_prefix, output):
     abc = name_prefix.split('_')  # 获取Excel的abc列内容
     print(abc)
     if len(abc) < 4:
@@ -43,7 +43,7 @@ def txt2excel(txt_file, name_prefix):
     
     pos = []  # 保存txt表头每列的起始位置
     hijks = ["TestDescription/Event", "Result", "Value", "U.limit", "L.limit", "DUT", "Pin/pattern", "Sequence"]
-    head = ["LOT_ID", "WaferID", "PROBE_XY", "Temperature(C)", "Power Voltage(V)", "Pin/Pattern", "LimitUpper", "LimitLower", "Value", "Result", "Test Condition1"]
+    head = ["LOT_ID", "WaferID", "PROBE_XY", "Temperature(C)", "Power Voltage(V)", "Pin/Pattern", "Result", "LimitUpper", "LimitLower", "Value", "Test Condition"]
 
     txtlines = txt_file.readlines()  # 读取txt行数据
     for s in hijks:
@@ -57,10 +57,10 @@ def txt2excel(txt_file, name_prefix):
     
     pos_range = []  # 每一列的范围，按照Excel表的位置保存
     pos_range.append([pos[6], pos[7]])
+    pos_range.append([pos[1], pos[2]])
     pos_range.append([pos[3], pos[4]])
     pos_range.append([pos[4], pos[5]])
     pos_range.append([pos[2], pos[3]])
-    pos_range.append([pos[1], pos[2]])
     pos_range.append([pos[0], pos[1]])
     print(pos_range)
 
@@ -81,7 +81,7 @@ def txt2excel(txt_file, name_prefix):
             start = True
             continue
         elif txtline[0 : 6] == '** End':
-            xls.save(excel_temp + '.xlsx')
+            xls.save(output + '/' + excel_temp + '.xlsx')
             print('[Write] save excel:', excel_temp, k)
             voltage = 0.0
             start = False
@@ -90,7 +90,7 @@ def txt2excel(txt_file, name_prefix):
         # 判断此行是否为电压数值
         power = txtline[pos_range[-1][0] : pos_range[-1][1]]  
         if 'VccPower' in power:
-            vcc = txtline[pos_range[3][0] : pos_range[3][1]]
+            vcc = txtline[pos_range[-2][0] : pos_range[-2][1]]
             vcc = vcc.strip()
             voltage = float(vcc)
             continue
@@ -99,11 +99,11 @@ def txt2excel(txt_file, name_prefix):
         
         # print(excelname, k)
         if not excelname in excel_dict:  # 如果无此表，保存上一次的结果，并另新建一个
-            if os.path.exists(excelname + '.xlsx'):
+            if os.path.exists(output + '/' + excelname + '.xlsx'):
                 print("\033[0;33m[Warn] please keep pwd no excel\033[0m")
-                return
+                sys.exit()
             if excel_temp != '':  # 判断是否为第一次有效行
-                xls.save(excel_temp + '.xlsx')
+                xls.save(output + '/' + excel_temp + '.xlsx')
                 print('[Write] save excel:', excel_temp, k)
                 xls = openpyxl.Workbook()
 
@@ -112,38 +112,40 @@ def txt2excel(txt_file, name_prefix):
             c = 1  # 在excel开始写的位置（x）
             excel_dict[excelname] = r
             sheet = xls.create_sheet(excelname, 0)
-            for i in range(len(head)):  # 写表头数据
-                sheet.cell(row = 1, column = i + 1, value = head[i])
+            sheet.append(head)
+            # for i in range(len(head)):  # 写表头数据
+            #     sheet.cell(row = 1, column = i + 1, value = head[i])
         else:  # 表已存在
             if txt_temp != '' and txt_temp != name_prefix:  # 如果是后续文件
                 if excel_temp != '' and excel_temp != excelname:  # 非首行出现上一条不同类型，保存之前结果
-                    xls.save(excel_temp + '.xlsx')
+                    xls.save(output + '/' + excel_temp + '.xlsx')
                     print('[Write] save excel:', excel_temp, k)
             else:  # 如果是第一个txt文件
                 if excel_temp != excelname:
-                    xls.save(excel_temp + '.xlsx')
+                    xls.save(output + '/' + excel_temp + '.xlsx')
                     print('[Write] save excel:', excel_temp, k)
 
             if excel_temp != excelname:  # 出现不同类型，则指向新类型
                 print('[Read] load excel:', excelname, k)
-                xls = openpyxl.load_workbook(excelname + '.xlsx')
+                xls = openpyxl.load_workbook(output + '/' + excelname + '.xlsx')
                 sheet = xls[excelname]
         # 上面判断主要目的指向正确的xls
         
         
         # sheet[excelname] = xls[excelname].get_sheet_by_name(excelname)
         # 对每一列写数据
-        pin = txtline[pos_range[0][0] : pos_range[0][1]]
-        r_f = txtline[pos_range[-2][0] : pos_range[-2][1]]
+        redundant_list = abc[0:4]
+        redundant_list.append(str(voltage))
+        redundant_list.append(txtline[pos_range[0][0] : pos_range[0][1]])
+        redundant_list.append(txtline[pos_range[1][0] : pos_range[1][1]])
+        # for s in redundant_list:
+        #     print("str:%s, type:%s" % (s, type(s)))
+        sheet.append(redundant_list)
+        # pin = txtline[pos_range[0][0] : pos_range[0][1]]
+        # r_f = txtline[pos_range[-2][0] : pos_range[-2][1]]
         nrow = excel_dict[excelname]
-        for i in range(len(head)):
-            if i < 4:
-                sheet.cell(row = nrow, column = i + 1, value = abc[i])
-            elif i == 4:
-                sheet.cell(row = nrow, column = i + 1, value = voltage)
-            elif i == 5:  # 不用考虑单位
-                sheet.cell(row = nrow, column = i + 1, value = pin)
-            elif 5 < i < 9:  # 考虑单位
+        for i in range(7, len(head)):
+            if i < 10:  # 考虑单位
                 txt_cell = txtline[pos_range[i-5][0] : pos_range[i-5][1]]
                 pattern = r'[A-Za-z]+|[-]?\d+[.]?\d*'
                 result = re.findall(pattern, txt_cell)
@@ -154,8 +156,6 @@ def txt2excel(txt_file, name_prefix):
                     sheet.cell(row = nrow, column = i + 1, value = result[0])
                 else:
                     sheet.cell(row = nrow, column = i + 1, value = txt_cell)
-            elif i == 9:
-                sheet.cell(row = nrow, column = i + 1, value = r_f)
             elif i == 10: # 多条件处理
                 event = txtline[pos_range[-1][0] : pos_range[-1][1]]
                 if len(event.split(':')) <= 1:
@@ -172,13 +172,13 @@ def txt2excel(txt_file, name_prefix):
                 # pattern = r'(.*?);'
                 # result = re.findall(pattern, date) # result = {' 0x00', ' 0x01', ' -0uA'}
                 for j in range(len(dates)):
-                    decimal, unit, type = dec_hex(dates[j])
-                    if type:
+                    decimal, unit, unit_flag = dec_hex(dates[j])
+                    if unit_flag:
                         test = descs[j] + '/' + unit
                     else:
                         test = descs[j]
-                    sheet.cell(row = nrow, column = j + i + 1, value = decimal)
-                    sheet.cell(row = 1, column = j + i + 1, value = test)
+                    sheet.cell(row = nrow, column = j + i + 2, value = decimal)
+                    sheet.cell(row = 1, column = j + i + 2, value = test)
                         
         excel_dict[excelname] += 1
         excel_temp = excelname
@@ -186,7 +186,9 @@ def txt2excel(txt_file, name_prefix):
 
 def fun1(xl):
     xls = openpyxl.load_workbook(xl)
-    source = xls[xl.split('.')[0]]  # sheet
+    sheet_name = os.path.basename(xl)
+    sheet_name = sheet_name.split('.')[0]
+    source = xls[sheet_name]  # sheet
     cc = 9
     unit = ''
     pre = ''
@@ -270,7 +272,7 @@ def fun1(xl):
                 print('\033[0;33m[Warn]T do nothing\033[0m')
             
             target.append(line)
-            target.cell(row=t_rr, column=t_cc, value=line[8])
+            target.cell(row=t_rr, column=t_cc, value=line[9])
         else:
             if len(head_num) == 0:  # 第一行
                 head_num.append(val)
@@ -293,9 +295,9 @@ def fun1(xl):
                         t_cc += i + 1
             # print('[%d, %d]' % (t_rr, t_cc))
             val_pre = val
-            target.cell(row=t_rr, column=t_cc, value=line[8])  # 填充value值
+            target.cell(row=t_rr, column=t_cc, value=line[9])  # 填充value值
     xls.remove(source)
-    target.title = xl.split('.')[0]
+    target.title = sheet_name
     xls.save(xl)
 
 def merger_excel(xl_file):
@@ -305,7 +307,7 @@ def merger_excel(xl_file):
     filelist = []  # 保存需要合并的文件
 
     for file in xl_file:
-        name = file.split('.xlsx')[0]
+        name = os.path.basename(file)
         name = name.split('_')[0]
         if not name in prefix:
             prefix[name] = 1
@@ -319,7 +321,8 @@ def merger_excel(xl_file):
     for i in range(len(key)):
         filelist_temp = []
         for file in xl_file:
-            if key[i] == file.split('_')[0]:
+            name = os.path.basename(file)
+            if key[i] == name.split('_')[0]:
                 filelist_temp.append(file)
         filelist.append(filelist_temp)
     print(filelist)  # 需要合并的文件列表
@@ -335,11 +338,11 @@ def merger_excel(xl_file):
             target = openpyxl.load_workbook(filelist[i][j]).active
             target._parent = src
             src._add_sheet(target)
-            sheet_name = filelist[i][j].split('.')[0]
+            sheet_name = filelist[i][j]
             # target_sheet = target.get_sheet_by_name(sheet_name)
             # src.copy_worksheet(target_sheet)
             print('[Merger] sheet ' + sheet_name)
-            os.remove(filelist[i][j])
+            os.remove(sheet_name)
             print('[Delete] sheet ' + sheet_name)
         ws = src['Sheet']
         src.remove(ws)
@@ -350,40 +353,57 @@ def merger_excel(xl_file):
             test_name = '_DC_TEST'
         else:
             test_name = '_TEST'
-        os.rename(filelist[i][0], key[i] + test_name + '.xlsx')
+        aa = key[i] + test_name + '.xlsx'
+        os.rename(filelist[i][0], os.path.dirname(filelist[i][0]) + '/' + aa)
         print('[Name] new excel name ' + key[i] + 'DC_TEST' + '.xlsx')
 
 
 if __name__ == "__main__":
     
-    txt_num = len(sys.argv)
-    txt_prefix = []  # 保存txt文件前缀名
+    arg_num = len(sys.argv)
+    txt_list = []
+    txt_prefix = ''  # 保存txt文件前缀名
     xl_file = []
-    merger = True
-    fun = True
+    mainfun = True  # 开启主功能
+    merger = True  # 开启合并功能
+    fun = True  # 开启转换功能
     fun_key = ["VCCIO", "HVPP", "VLD"]
     fun_list = []
-    for i in range(1, txt_num):
-        if os.path.exists(sys.argv[i]):  # 如果文件名存在
-            txt_prefix.append(os.path.basename(sys.argv[i]).split('.txt')[0])
-            print('[Read] txtFile %s : %s' % (i, sys.argv[i]))
-        else:
-            print("\033[0;31m[Error] txtFile %s : %s not found\033[0m" % (i, sys.argv[i]))
-            sys.exit()
+    output = 'output'
+    if os.path.isdir(sys.argv[1]):
+        for i in range(1, arg_num):
+            temp = os.listdir(sys.argv[i])
+            for j in range(len(temp)):
+                txt_list.append(sys.argv[i] + '/' + temp[j])
+        
+    elif os.path.isfile(sys.argv[1]):
+        for i in range(1, arg_num):
+            if os.path.exists(sys.argv[i]):  # 如果文件名存在
+                # txt_list.append(os.path.basename(sys.argv[i]))
+                txt_list.append(sys.argv[i])
+            else:
+                print("\033[0;31m[Error] txtFile %s : %s not found\033[0m" % (i, sys.argv[i]))
+                sys.exit()
+    else:
+        print("\033[0;31m[Error] Dont identify arg")
     
-    for i in range(1, txt_num):
-        txtfile = open(sys.argv[i], 'r')
-        print('\033[0;32mStart transform txt: %s\033[0m' % sys.argv[i])
-        txt2excel(txtfile, txt_prefix[i - 1])
-        txtfile.close()
+    if mainfun:
+        for txt in txt_list:
+            pre = os.path.basename(txt)
+            txt_prefix = pre.split('.txt')[0]
+            txtfile = open(txt, 'r')
+            print('\033[0;32mStart transform txt: %s\033[0m' % txt)
+            txt2excel(txtfile, txt_prefix, output)
+            txtfile.close()
     
-    listd = os.listdir('./')  # 文件列表
+    listd = os.listdir(output)  # 文件列表
     for file in listd:
         if file.endswith('.xlsx'):  # excel文件
-            xl_file.append(file)
+            xl_file.append(output + '/' + file)
     
     for key in fun_key:  # 对特定文件判断
         for file in xl_file:
+            temp = os.path.basename(file)
             if key in file.split('_')[0]:
                 fun_list.append(file)
     if fun:
