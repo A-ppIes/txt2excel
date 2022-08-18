@@ -387,6 +387,8 @@ if __name__ == "__main__":
     else:
         print("\033[0;31m[Error] Dont identify arg")
     
+    if not os.path.exists(output):
+        os.mkdir(output)
     if mainfun:
         for txt in txt_list:
             pre = os.path.basename(txt)
